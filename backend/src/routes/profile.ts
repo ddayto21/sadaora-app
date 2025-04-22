@@ -2,7 +2,8 @@
 import { Router } from "express";
 import {
   createHandler,
-  readHandler,
+  getProfileHandler,
+  getProfileByIdHandler,
   updateHandler,
   deleteHandler,
 } from "../controllers/profile.controller";
@@ -24,7 +25,8 @@ import { authMiddleware } from "../middleware/auth.middleware";
 const router = Router();
 
 router.post("/", authMiddleware, createHandler); // Create user profile
-router.get("/", authMiddleware, readHandler); // Read user profile
+router.get("/", getProfileHandler); // Get profile for authenticated user that logged in.
+router.get("/:id", getProfileByIdHandler); // Retrieve a public user profile based on the given `userId` in the route param.
 router.put("/", authMiddleware, updateHandler); // Update user profile
 router.delete("/", authMiddleware, deleteHandler); // Delete user profile
 

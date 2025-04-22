@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { generateToken, verifyToken } from "../../src/utils/jwt";
+import { encodeToken, decodeToken } from "../../src/utils/jwt";
 
 /**
  * Unit tests for the JWT utility functions.
@@ -14,15 +14,15 @@ describe("JWT Utilities", () => {
   const payload = { userId: "user-123" };
 
   it("should generate a valid JWT token", () => {
-    const token = generateToken(payload);
+    const token = encodeToken(payload);
 
     expect(typeof token).toBe("string");
     expect(token.split(".")).toHaveLength(3); // JWT format: header.payload.signature
   });
 
   it("should verify and decode a valid token correctly", () => {
-    const token = generateToken(payload);
-    const decoded = verifyToken(token);
+    const token = encodeToken(payload);
+    const decoded = decodeToken(token);
 
     expect(decoded).toHaveProperty("userId", payload.userId);
     expect(decoded).toHaveProperty("iat"); // issued at
@@ -32,6 +32,6 @@ describe("JWT Utilities", () => {
   it("should throw an error for an invalid token", () => {
     const fakeToken = "invalid.token.string";
 
-    expect(() => verifyToken(fakeToken)).toThrow();
+    expect(() => decodeToken(fakeToken)).toThrow();
   });
 });

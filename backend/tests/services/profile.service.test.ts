@@ -90,7 +90,7 @@ it("should create a profile with interests", async () => {
  * - Should retrieve the profile associated with the user
  * - Should return full profile data including interests
  */
-it("should retrieve the user’s profile", async () => {
+it("should return user profile information", async () => {
   const profile = await getProfile(userId);
 
   expect(profile).not.toBeNull();

@@ -2,7 +2,7 @@
 
 import bcrypt from "bcrypt";
 import databaseClient from "../db-client";
-import { verifyToken } from "../utils/jwt";
+import { decodeToken } from "../utils/jwt";
 
 /**
  * Designed to create a user profile in the postgresql database
@@ -45,6 +45,14 @@ export async function loginUser(email: string, password: string) {
   return user;
 }
 
+/** Prevents duplicate users by checking if emamil already registered */
+export async function findUserByEmail(email: string) {
+  const user = await databaseClient.user.findUnique({
+    where: { email },
+  });
+  return user;
+}
+
 /**
  * Verifies if a user is authenticated by validating the JWT token.
  *
@@ -58,9 +66,9 @@ export async function loginUser(email: string, password: string) {
  * @returns The user object if the token is valid, otherwise null
  */
 
-export async function verifyUser(token: string) {
+export async function getUser(token: string) {
   try {
-    const decoded = verifyToken(token);
+    const decoded = decodeToken(token);
     const user = await databaseClient.user.findUnique({
       where: { id: decoded.userId },
     });

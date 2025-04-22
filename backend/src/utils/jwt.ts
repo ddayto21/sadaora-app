@@ -11,7 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "default-secret-key";
  * @param payload - The data to encode in the token (e.g. userId)
  * @returns A signed JWT string valid for 7 days
  */
-export function generateToken(payload: object): string {
+export function encodeToken(payload: object): string {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
 }
 
@@ -24,6 +24,6 @@ export function generateToken(payload: object): string {
  * @param token - The JWT string to verify
  * @returns The decoded payload if valid, or throws an error if invalid/expired
  */
-export function verifyToken(token: string): any {
+export function decodeToken(token: string): any {
   return jwt.verify(token, JWT_SECRET);
 }

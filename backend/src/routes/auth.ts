@@ -1,7 +1,13 @@
 //src/routes/auth.ts
 
 import { Router } from "express";
-import { signup, login, getCurrentUser } from "../controllers/auth.controller";
+import {
+  signup,
+  login,
+  logoutHandler,
+  checkAuthHandler,
+
+} from "../controllers/auth.controller";
 
 const router = Router();
 
@@ -47,6 +53,17 @@ router.post("/login", login);
  *
  * @access Protected (but token is checked manually, no middleware)
  */
-router.get("/me", getCurrentUser);
+router.get("/me", checkAuthHandler);
+
+/**
+ * @route POST /api/auth/logout
+ * @descr Logs out the current user
+ *
+ * - Clears the authentication token cookie
+ * - Returns 200 with success message
+ *
+ * @access Public
+ */
+router.post("/logout", logoutHandler);
 
 export default router;

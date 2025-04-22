@@ -37,17 +37,24 @@ export const createProfile = async (
 };
 
 /**
- * Retrieves the profile for a given user ID.
+ * Retrieves a profile by user ID with optional privacy control.
  *
- * @param userId - The ID of the user whose profile is being fetched
- * @returns The profile and its associated interests, or null if not found
+ * @param userId - ID of the user whose profile is being requested
+ * @param options - Optional flags (e.g. hideEmail for public views)
+ * @returns Profile object with interests, or null if not found
  */
 export const getProfile = async (
-  userId: string
+  userId: string,
+  options?: { includeUser?: boolean }
 ): Promise<(Profile & { interests: Interest[] }) | null> => {
+  console.log(`[*] Retrieving profile for user ID: ${userId}`);
+  
   return databaseClient.profile.findUnique({
     where: { userId },
-    include: { interests: true },
+    include: {
+      interests: true,
+      ...(options?.includeUser ? { user: true } : {}),
+    },
   });
 };
 

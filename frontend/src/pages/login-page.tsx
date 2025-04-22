@@ -1,30 +1,43 @@
 // src/pages/LoginPage.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { signup, login } from "../api/auth";
 
 export const LoginPage = () => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [isSignup, setIsSignup] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    setError(null);
   };
 
   const handleAuth = async () => {
+    if (!form.email || !form.password) {
+      setError("Both email and password are required.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
     setLoading(true);
     try {
-      const endpoint = isSignup ? "/api/auth/signup" : "/api/auth/login";
-      await fetch(endpoint, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      navigate("/feed");
-    } catch (err) {
-      console.error("Authentication failed");
+      if (isSignup) {
+        await signup(form.email, form.password);
+      } else {
+        await login(form.email, form.password);
+      }
+      navigate("/");
+    } catch (error: any) {
+      console.error("Authentication failed:", error);
+      setError(error.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -73,6 +86,11 @@ export const LoginPage = () => {
               onChange={handleChange}
               className="w-full px-4 py-3 rounded-lg bg-neutral-800 text-white border border-neutral-700 placeholder-gray-500 focus:ring-2 focus:ring-yellow-500 focus:outline-none text-sm font-medium"
             />
+
+            {error && (
+              <p className="text-sm text-red-500 text-center -mt-2">{error}</p>
+            )}
+
             <button
               onClick={handleAuth}
               disabled={loading}

@@ -12,13 +12,16 @@
 
 // src/middleware/auth.middleware.ts
 import { Request, Response, NextFunction } from "express";
-import { verifyToken } from "../utils/jwt";
+import { decodeToken } from "../utils/jwt";
 
 export const authMiddleware = (
   req: Request,
   res: Response,
   next: NextFunction
 ): void => {
+  console.log(`[authMiddleware] Request received: ${req.method} ${req.url}`);
+
+  // Check if the request has a token in cookies
   const token = req.cookies.token;
 
   if (!token) {
@@ -26,10 +29,21 @@ export const authMiddleware = (
     return;
   }
 
+  console.log(`[authMiddleware] Token: ${JSON.stringify(token, null, 2)}`);
   try {
-    const payload = verifyToken(token);
-    // Attahch the user id to the request object
-    req.user = { id: payload.userId };
+    const payload = decodeToken(token);
+    console.log(
+      `[authMiddleware] Decoded token payload: ${JSON.stringify(
+        payload,
+        null,
+        2
+      )}`
+    );
+    // Attach the userId to the request object
+    req.user = {
+      userId: payload.userId,
+      // Add other properties if needed
+    };
     next();
   } catch (err) {
     res.status(401).json({ error: "Invalid or expired token" });
