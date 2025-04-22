@@ -51,13 +51,6 @@ export const getProfile = async (
   });
 };
 
-/** Retrieve feed of all user profiles, excluding the user making the request */
-export const getAllProfiles = async (userId: string) => {
-  return databaseClient.profile.findMany({
-    where: { userId: { not: userId } },
-  });
-};
-
 /**
  * Updates the profile for a given user ID.
  *

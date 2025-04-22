@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { createProfile, getProfile, updateProfile, deleteProfile } from "../../src/services/profile.service";
+import {
+  createProfile,
+  getProfile,
+  updateProfile,
+  deleteProfile,
+} from "../../src/services/profile.service";
 
 import databaseClient from "../../src/db-client";
 import { createUser } from "../../src/services/auth.service";
@@ -9,17 +14,50 @@ const testPassword = "securepass123";
 let userId: string;
 
 beforeAll(async () => {
+  console.log(`[*] Running profile service tests...`);
+  console.log(`[*] Test email: ${testEmail}`);
+  console.log(`[*] Test password: ${testPassword}`);
+
+  console.log(`[*] Connecting to database...`);
   await databaseClient.$connect();
 
   // Create a user to link the profile
+  console.log(`[*] Creating test user...`);
   const user = await createUser(testEmail, testPassword);
+  expect(user).toBeDefined();
   userId = user.id;
+  expect(userId).toBeDefined();
+  expect(user.email).toBe(testEmail);
+  console.log(`[*] User created: ${JSON.stringify(user, null, 2)} `);
+  console.log(`[*] Test userId: ${userId}`);
+
+  // const existingProfile = await databaseClient.profile.findMany();
+  // if (existingProfile.length > 0) {
+  //   console.log(
+  //     `[*] Found existing profiles: ${JSON.stringify(existingProfile, null, 2)}`
+  //   );
+  // }
 });
 
 afterAll(async () => {
+  console.log(`[*] Cleaning up test data...`);
+  // Clean up the test user and their profile
+  // Note: This is a simplified cleanup. In a real-world scenario, we will need to
+  // handle this more gracefully, especially if there are multiple tests.
+
   await databaseClient.interest.deleteMany({ where: { profile: { userId } } });
   await databaseClient.profile.deleteMany({ where: { userId } });
   await databaseClient.user.deleteMany({ where: { id: userId } });
+
+  const remainingUsers = await databaseClient.user.findMany();
+
+  console.log(
+    `[*] Remaining users: ${JSON.stringify(remainingUsers, null, 2)}`
+  );
+
+  console.log(`[*] Test user and profile deleted.`);
+  console.log(`[*] Disconnecting from database...`);
+  // Disconnect from the database
 
   await databaseClient.$disconnect();
 });

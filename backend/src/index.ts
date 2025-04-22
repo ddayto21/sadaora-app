@@ -12,6 +12,9 @@
  */
 
 import authRoutes from "./routes/auth";
+import profileRoutes from "./routes/profile";
+import feedRoutes from "./routes/feed";
+
 import express, { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import cors from "cors";
@@ -31,6 +34,12 @@ app.get("/", (req: Request, res: Response) => {
 
 // Mount all /api/auth routes
 app.use("/api/auth", authRoutes);
+
+// Mount all /api/profile routes
+app.use("/api/profile", profileRoutes);
+
+// Mount all /api/feed routes
+app.use("/api/feed", feedRoutes);
 
 // Run the server on port 3001
 app.listen(PORT, () => {
