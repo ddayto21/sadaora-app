@@ -15,9 +15,7 @@ export const ProfilePage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("/api/profile", {
-      credentials: "include",
-    })
+    fetch("/api/profile", { credentials: "include" })
       .then((res) => res.json())
       .then((data) => {
         if (data) {
@@ -56,18 +54,18 @@ export const ProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex justify-center items-center p-8">
-      <div className="w-full max-w-lg space-y-6">
-        <h1 className="text-3xl font-bold text-center bg-gradient-to-r from-blue-500 to-purple-500 text-transparent bg-clip-text">
-          My Profile
+    <div className="min-h-screen bg-black text-white flex justify-center items-center px-4 py-12">
+      <div className="w-full max-w-xl bg-neutral-900 rounded-2xl p-10 shadow-xl border border-neutral-800 space-y-6">
+        <h1 className="text-4xl font-semibold text-center text-white mb-6">
+          Profile
         </h1>
 
         <input
           name="name"
-          placeholder="Name"
+          placeholder="Full Name"
           value={profile.name}
           onChange={handleChange}
-          className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+          className="w-full px-4 py-3 rounded-lg bg-neutral-800 text-white border border-neutral-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
         />
 
         <input
@@ -75,7 +73,7 @@ export const ProfilePage = () => {
           placeholder="Headline"
           value={profile.headline}
           onChange={handleChange}
-          className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+          className="w-full px-4 py-3 rounded-lg bg-neutral-800 text-white border border-neutral-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
         />
 
         <textarea
@@ -83,15 +81,15 @@ export const ProfilePage = () => {
           placeholder="Bio"
           value={profile.bio}
           onChange={handleChange}
-          className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+          className="w-full px-4 py-3 rounded-lg bg-neutral-800 text-white border border-neutral-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm resize-none"
         ></textarea>
 
         <input
           name="photoUrl"
-          placeholder="Photo URL"
+          placeholder="Profile Image URL"
           value={profile.photoUrl}
           onChange={handleChange}
-          className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+          className="w-full px-4 py-3 rounded-lg bg-neutral-800 text-white border border-neutral-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
         />
 
         <input
@@ -99,13 +97,13 @@ export const ProfilePage = () => {
           placeholder="Interests (comma-separated)"
           value={profile.interests}
           onChange={handleChange}
-          className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded text-white"
+          className="w-full px-4 py-3 rounded-lg bg-neutral-800 text-white border border-neutral-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
         />
 
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded font-semibold disabled:opacity-50"
+          className="w-full py-3 rounded-lg bg-white text-black font-semibold text-sm hover:bg-gray-100 transition disabled:opacity-50"
         >
           {loading ? "Saving..." : "Save Profile"}
         </button>
