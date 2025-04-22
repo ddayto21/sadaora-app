@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -22,14 +21,14 @@ model User {
 }
 
 model Profile {
-  id        String   @id @default(uuid())
-  userId    String   @unique
+  id        String     @id @default(uuid())
+  userId    String     @unique
   name      String
   bio       String
   headline  String
   photoUrl  String?
-  interests Interest[] // one-to-many relation
-  user      User     @relation(fields: [userId], references: [id])
+  interests Interest[]
+  user      User       @relation(fields: [userId], references: [id])
 }
 
 model Interest {

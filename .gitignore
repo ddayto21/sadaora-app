@@ -1,7 +1,33 @@
-# Node
-node_modules/
-.env
+# Node modules
+**/node_modules/
 
-# React
-frontend/node_modules/
-frontend/build/
+# Build outputs
+**/dist/
+**/build/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+**/.env
+
+# IDE/editor folders
+.vscode/
+.idea/
+
+# OS metadata
+.DS_Store
+
+# Prisma generated client
+/backend/generated/
+**/.prisma/
+
+# SQLite (if used)
+**/*.db
+**/*.db-journal
+
+# Misc
+*.local
