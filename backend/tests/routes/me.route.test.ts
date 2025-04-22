@@ -23,12 +23,19 @@ let authCookie: string[]; // holds the JWT cookie for session continuity
 beforeAll(async () => {
   await databaseClient.$connect();
 
-  // Sign up a new user and store the auth cookie
-  const response = await request(app)
+  const signup = await request(app)
     .post("/api/auth/signup")
     .send({ email: testEmail, password: testPassword });
 
-  authCookie = response.headers["set-cookie"];
+  expect(signup.status).toBe(201);
+
+  const login = await request(app)
+    .post("/api/auth/login")
+    .send({ email: testEmail, password: testPassword });
+
+  expect(login.status).toBe(200);
+
+  authCookie = login.headers["set-cookie"];
 });
 
 afterAll(async () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { createUser, loginUser } from "../src/services/auth.services";
-import databaseClient from "../src/db-client";
+import { createUser, loginUser } from "../../src/services/auth.service";
+import databaseClient from "../../src/db-client";
 
 beforeAll(async () => {
   await databaseClient.$connect();

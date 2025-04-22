@@ -216,7 +216,7 @@ model User {
 
 #### 👤 Profile Model
 
-The `Profile` model stores all `public-facing` information that appears on a user’s pr`ofile pag`e or in the `public feed`. Each profile is connected to exactly one user via a `foreign key` (`userId`). A user can only have one profile, and vice versa.
+The `Profile` model stores all `public-facing` information that appears on a user’s `profile page` or in the `public feed`. Each profile is connected to exactly one user via a `foreign key` (`userId`). A user can only have one profile, and vice versa.
 
 ```prisma
 model Profile {

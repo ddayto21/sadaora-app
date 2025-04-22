@@ -3,12 +3,12 @@
 /**
  * Handles authentication-related HTTP requests.
  *
- * This file maps signup and login routes to service functions,
+ * This file maps authentication-related routes to service functions,
  * and manages request parsing, response formatting, and JWT-based session handling.
  */
 
 import { Request, Response, RequestHandler } from "express";
-import { createUser, loginUser, verifyUser } from "../services/auth.services";
+import { createUser, loginUser, verifyUser } from "../services/auth.service";
 import { generateToken } from "../utils/jwt";
 import { error } from "console";
 

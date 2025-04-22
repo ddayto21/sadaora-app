@@ -22,18 +22,13 @@ const testPassword = "plaintext1234";
 beforeAll(async () => {
   await databaseClient.$connect();
 
-  const signupResponse = await request(app).post("/api/auth/signup").send({
-    email: testEmail,
-    password: testPassword,
-  });
+  // Make sure user exists
+  const signup = await request(app)
+    .post("/api/auth/signup")
+    .send({ email: testEmail, password: testPassword });
 
-  if (signupResponse.status !== 201) {
-    throw new Error(
-      `Signup failed with status ${signupResponse.status}: ${JSON.stringify(
-        signupResponse.body
-      )}`
-    );
-  }
+  expect(signup.status).toBe(201);
+  
 });
 
 afterAll(async () => {

@@ -1,11 +1,11 @@
-// src/services/auth.services.ts
+// src/services/auth.service.ts
 
 import bcrypt from "bcrypt";
 import databaseClient from "../db-client";
 import { verifyToken } from "../utils/jwt";
 
 /**
- * Handles password hasing and user creation in the postgresql database
+ * Designed to create a user profile in the postgresql database
  *
  * This services takes an email and raw password, hashes the password using bcrypt for security, and creates a new user record with prisma database client
  *
@@ -81,4 +81,3 @@ export async function verifyUser(token: string) {
  *
  * @param response - The Express response object to set the cookie
  */
-
