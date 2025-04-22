@@ -8,7 +8,6 @@ import { faker } from "@faker-js/faker";
  *
  */
 
-
 async function main() {
   const numUsers = 10;
 
@@ -53,4 +52,3 @@ main()
     console.error("Error during seeding:", error);
     return databaseClient.$disconnect();
   });
-
