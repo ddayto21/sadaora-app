@@ -1,48 +1,103 @@
 // src/controllers/auth.controller.ts
 
 /**
- * Translated HTTP requests into service calls
- * - Handles validation, response shaping, and error formatting
- * around the service logic
+ * Handles authentication-related HTTP requests.
+ *
+ * This file maps signup and login routes to service functions,
+ * and manages request parsing, response formatting, and JWT-based session handling.
  */
 
-import express, { Request, Response } from "express";
-import { createUser, verifyUser } from "../services/auth.services";
+import { Request, Response, RequestHandler } from "express";
+import { createUser, loginUser, verifyUser } from "../services/auth.services";
+import { generateToken } from "../utils/jwt";
+import { error } from "console";
 
 /**
- * Handles incoming signup requests.
+ * Handles user signup requests.
  *
- * Extracts the email and password from the request body,
- * and delegates the user creation to the `createUser` service in `auth.services.ts`.
- * Responds with a 201 status and newly created user.
- *
- * @param request - Exptress HTTP request containin the `email` and `password`
- * @param response - Express HTTP response used to return status and data
- *
+ * 1. Accepts `email` and `password` from the request body.
+ * 2. Creates a new user using the `createUser` service.
+ * 3. Generates a JWT token containing the user's ID.
+ * 4. Stores the token in an HttpOnly cookie so the user stays logged in.
+ * 5. Responds with the created user and HTTP 201 status.
  */
-export async function signup(request: Request, response: Response) {
+export const signup: RequestHandler = async (
+  request: Request,
+  response: Response
+) => {
   const { email, password } = request.body;
-  const result = await createUser(email, password);
-  response.status(201).json(result);
-}
+  const user = await createUser(email, password);
+
+  const token = generateToken({ userId: user.id });
+
+  response.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
+  response.status(201).json(user);
+};
 
 /**
- * Handles incoming login requests.
+ * Handles user login.
  *
- * Extracts the `email` and password from the request body,
- * then calls the `verifyUser` service to validate credentials.
- * Returns the user object on success, or a `401 error` on failure.
- *
- * @param request - Express HTTP request with `email` and `passwrod`
- * @param response - Express HTTP response used to return status and data
+ * 1. Accepts `email` and `password` from the request body.
+ * 2. Validates the user credentials using the `loginUser` service.
+ * 3. If valid, generates a JWT token containing the user's ID.
+ * 4. Sets the token in an HttpOnly cookie to maintain the session.
+ * 5. Responds with the user object and HTTP 200 status.
+ * 6. If credentials are invalid, responds with 401 and an error message.
  */
 
-export async function login(request: Request, response: Response) {
+export const login: RequestHandler = async (
+  request: Request,
+  response: Response
+) => {
   const { email, password } = request.body;
-  const user = await verifyUser(email, password);
+  const user = await loginUser(email, password);
+
   if (!user) {
-    return response.status(401).json({ error: "Invalid email or password" });
+    response.status(401).json({ error: "Invalid email or password" });
+    return;
   }
 
-  return response.status(200).json(user);
-}
+  const token = generateToken({ userId: user.id });
+
+  // Set HTTPOnly cookie
+  response.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
+
+  response.status(200).json(user);
+  return;
+};
+
+/**
+ * Handles GET request to `/api/auth/me`.
+ *
+ * 1. Reads the JWT token from the cookie
+ * 2. Verifies the token using `verifyUser`
+ * 3. Returns the user if valid, or 401 if not authenticated
+ */
+export const getCurrentUser: RequestHandler = async (req, res) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    res.status(401).json({ error: "Not authenticated" });
+    return;
+  }
+
+  const user = await verifyUser(token);
+
+  if (!user) {
+    res.status(401).json({ error: "Invalid or expired token" });
+    return;
+  }
+
+  res.status(200).json(user);
+};

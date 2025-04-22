@@ -351,7 +351,7 @@ We update the `package.json` scripts to streamline our development workflow and 
 
 ```json
 "scripts": {
-"dev": "ts-node src/index.ts",
+"dev": "ts-node-dev --respawn --transpile-only src/index.ts",
 "build": "tsc",
 "start": "node dist/index.js"
 }
@@ -370,17 +370,22 @@ npm install --save-dev @types/express @types/cors @types/cookie-parser
 Initialize a node server using express:
 
 ```typescript
-const express = require("express");
 const app = express();
-const cors = require("cors");
-const cookieParser = require("cookie-parser");
+```
 
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+Configure middleware
+
+```typescript
+app.use(cors({ origin: "http://localhost:5173" }));
 app.use(express.json());
 app.use(cookieParser());
+```
 
-app.listen(5000, () => {
-  console.log("Server running on http://localhost:5000");
+Run the server on port 3001
+
+```typescript
+app.listen(3001, () => {
+  console.log("Server is running on port", PORT);
 });
 ```
 

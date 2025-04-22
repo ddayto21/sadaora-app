@@ -2,6 +2,7 @@
 
 import bcrypt from "bcrypt";
 import databaseClient from "../db-client";
+import { verifyToken } from "../utils/jwt";
 
 /**
  * Handles password hasing and user creation in the postgresql database
@@ -20,7 +21,7 @@ export async function createUser(email: string, password: string) {
 }
 
 /**
- * Verifies user credentials for login.
+ * Handles user login and password verification flow.
  *
  * Looks up the user by email, and compares the provided password
  * with the hashed password stored in the database.
@@ -32,7 +33,7 @@ export async function createUser(email: string, password: string) {
  * @returns The user object if credentials are valid, otherwise null
  */
 
-export async function verifyUser(email: string, password: string) {
+export async function loginUser(email: string, password: string) {
   const user = await databaseClient.user.findUnique({
     where: { email },
   });
@@ -43,3 +44,41 @@ export async function verifyUser(email: string, password: string) {
 
   return user;
 }
+
+/**
+ * Verifies if a user is authenticated by validating the JWT token.
+ *
+ * Reads the JWT token from the provided cookie string, verifies its signature,
+ * and uses the decoded payload to look up the user in the database.
+ *
+ * Called by the `verify` controller (e.g. in `/api/auth/me`) to check
+ * if the request is coming from a valid, logged-in user.
+ *
+ * @param token - The JWT string (typically extracted from req.cookies.token)
+ * @returns The user object if the token is valid, otherwise null
+ */
+
+export async function verifyUser(token: string) {
+  try {
+    const decoded = verifyToken(token);
+    const user = await databaseClient.user.findUnique({
+      where: { id: decoded.userId },
+    });
+    return user || null;
+  } catch (error) {
+    return null;
+  }
+}
+
+// TODO: Add service to handle user logout
+
+/**
+ * Handles user logout by clearing the JWT token cookie.
+ *
+ * This is typically called when the user clicks "Logout" in the UI,
+ * and it removes the token from the client's cookies, effectively
+ * logging them out.
+ *
+ * @param response - The Express response object to set the cookie
+ */
+

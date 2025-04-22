@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { createUser, verifyUser } from "../src/services/auth.services";
+import { createUser, loginUser } from "../src/services/auth.services";
 import databaseClient from "../src/db-client";
 
 beforeAll(async () => {
@@ -39,20 +39,20 @@ describe("Authentication service integration tests", () => {
     expect(user.password).not.toBe(password);
   });
 
-  it("verifyUser - should return the user if credentials are valid", async () => {
-    const user = await verifyUser(email, password);
+  it("loginUser - should return the user if credentials are valid", async () => {
+    const user = await loginUser(email, password);
 
     expect(user).not.toBeNull();
     expect(user!.email).toBe(email);
   });
 
-  it("verifyUser - should return null if password is invalid", async () => {
-    const user = await verifyUser(email, "password");
+  it("loginUser - should return null if password is invalid", async () => {
+    const user = await loginUser(email, "password");
     expect(user).toBeNull();
   });
 
-  it('verifyUser - should return null if email is invalid', async () => {
-    const user = await verifyUser('notfound@example.com', password);
+  it('loginUser - should return null if email is invalid', async () => {
+    const user = await loginUser('notfound@example.com', password);
     expect(user).toBeNull();
   })
 });
