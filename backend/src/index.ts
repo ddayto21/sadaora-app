@@ -11,39 +11,64 @@
  * - Responds with newly created user on success.
  */
 
-import authRoutes from "./routes/auth";
+import authRoutes from "./routes/auth.route";
 import profileRoutes from "./routes/profile";
 import feedRoutes from "./routes/feed";
+import docRoutes from "./routes/docs";
 
 import express, { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
+import swaggerUi from "swagger-ui-express";
+import YAML from "yamljs";
+import path from "path";
+
+const openApiSpecification = YAML.load("./docs/openapi.yaml");
+
 const PORT = 3001;
 
 const app = express();
 
+// Serve webpage for openapi documentation
+app.use(
+  "/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(openApiSpecification, {
+    customCssUrl: "./docs/openapi-custom.css",
+    customSiteTitle: "📘 CRUD API Documentation",
+    explorer: true,
+  })
+);
+
+// Serve raw OpenAPI YAML for ReDoc
+app.use(
+  "/openapi.yaml",
+  express.static(path.join(__dirname, "../docs/openapi.yaml"))
+);
+
+// Serve raw OpenAPI YAML for ReDoc
+app.use("/docs", docRoutes);
+
+// Global Middleware
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
+// Base test route
 app.get("/", (req: Request, res: Response) => {
-  res.send("Hello from the backend!");
+  res.send("Backend server is running...");
 });
 
-// Mount all /api/auth routes
+// Mount application routes
 app.use("/api/auth", authRoutes);
-
-// Mount all /api/profile routes
 app.use("/api/profile", profileRoutes);
-
-// Mount all /api/feed routes
 app.use("/api/feed", feedRoutes);
 
-// Run the server on port 3001
+// Run the backend server
 app.listen(PORT, () => {
-  console.log("Server is running on port", PORT);
+  console.log(`Hosting backend server at: http://localhost:${PORT}`);
 });
 
 export default app;
