@@ -18,7 +18,7 @@ it("should display all existing users in database table", async () => {
   const profiles = await getProfileService();
   expect(profiles.length).toBeGreaterThan(0);
   expect(profiles[0]).toHaveProperty("id");
-  console.log(`[*] Profiles: ${JSON.stringify(profiles, null, 2)}`);
+  // console.log(`[*] Profiles: ${JSON.stringify(profiles, null, 2)}`);
   expect(profiles[0].name).toBeDefined();
   expect(profiles[0].bio).toBeDefined();
   expect(profiles[0].headline).toBeDefined();

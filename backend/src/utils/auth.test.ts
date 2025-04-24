@@ -1,40 +1,54 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { encodeToken, decodeToken, isValidEmail } from "./auth";
+// src/utils/auth.test.ts
+// src/utils/auth.test.ts
+import { describe, it, expect, beforeEach } from "vitest";
+import {
+  encodeToken,
+  decodeToken,
+  isValidEmail,
+  validatePassword,
+} from "./auth";
 import type { AuthTokenPayload } from "../interfaces/auth";
+import { setupTestUser } from "./setup-test-user";
 
-describe.skip("Auth-related utility functions", () => {
-  it("should encode user data into a JWT", () => {
-    const payload: AuthTokenPayload = {
-      userId: "1",
-      email: "email@gmail.com",
-      role: "user",
-    };
+/**
+ * @testSuite JWT Token Utilities
+ *
+ * Verifies correct encoding and decoding of user payloads using JSON Web Tokens.
+ */
+describe("JWT utility functions", () => {
+  const testUser: AuthTokenPayload = {
+    userId: "1",
+    email: "email@gmail.com",
+    role: "user",
+  };
 
-    const token = encodeToken(payload);
+  let token: string;
 
+  beforeEach(() => {
+    token = encodeToken(testUser);
+  });
+
+  it("should encode user payload into a valid token", () => {
     expect(token).toBeDefined();
     expect(typeof token).toBe("string");
+  });
 
+  it("should decode a valid token into the correct payload", () => {
     const decoded = decodeToken(token);
 
-    expect(decoded.userId).toBe(payload.userId);
-    expect(decoded.email).toBe(payload.email);
-    expect(decoded.role).toBe(payload.role);
-    expect(decoded.exp).toBeGreaterThan(decoded.iat); // check that token has a valid lifespan
+    expect(decoded.userId).toBe(testUser.userId);
+    expect(decoded.email).toBe(testUser.email);
+    expect(decoded.role).toBe(testUser.role);
+    expect(decoded.exp).toBeGreaterThan(decoded.iat);
   });
 });
 
 /**
- * @testSuite Email Validation Utility
+ * @testSuite Email Validation
  *
- * This test suite ensures that the `isValidEmail` utility correctly
- * validates email strings using a regular expression.
- *
- * - Validates common and RFC-compliant email formats.
- * - Rejects malformed or incomplete addresses.
- * - Helps prevent invalid input from being accepted during signup/login flows.
+ * Tests the isValidEmail utility for accepting well-formed emails and rejecting malformed inputs.
  */
-describe("isValidEmail", () => {
+describe("Email validation", () => {
   it("should return true for valid email addresses", () => {
     const validEmails = [
       "user@example.com",
@@ -64,10 +78,42 @@ describe("isValidEmail", () => {
     ];
 
     invalidEmails.forEach((email) => {
-      // Log the email being tested
-      const isValid = isValidEmail(email);
-
       expect(isValidEmail(email)).toBe(false);
+    });
+  });
+});
+
+/**
+ * @testSuite Password Validation
+ *
+ * Ensures password strength validation follows secure formatting rules.
+ */
+describe("Password validation", () => {
+  it("should accept strong valid passwords", () => {
+    const validPasswords = [
+      "StrongPass1!",
+      "Valid$123",
+      "My@Secure9",
+      "Test!Pass8",
+    ];
+
+    validPasswords.forEach((password) => {
+      expect(validatePassword(password)).toBe(true);
+    });
+  });
+
+  it("should reject weak or malformed passwords", () => {
+    const invalidPasswords = [
+      "A1!a", // too short
+      "weakpass1!", // no uppercase
+      "WEAKPASS1!", // no lowercase
+      "Weakpass!", // no number
+      "Weakpass1", // no symbol
+      "Weak pass1!", // contains space
+    ];
+
+    invalidPasswords.forEach((password) => {
+      expect(validatePassword(password)).toBe(false);
     });
   });
 });

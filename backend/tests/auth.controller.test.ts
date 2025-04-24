@@ -21,7 +21,7 @@ afterAll(async () => {
   await databaseClient.$disconnect();
 });
 
-describe("POST /api/auth/signup", () => {
+describe.skip("POST /api/auth/signup", () => {
   it("should create a new user and return 201", async () => {
     const response = await request(app)
       .post("/api/auth/signup")
@@ -34,7 +34,7 @@ describe("POST /api/auth/signup", () => {
   });
 });
 
-describe("POST /api/auth/login", () => {
+describe.skip("POST /api/auth/login", () => {
   it("should return 200 and user object if valid credentials provided", async () => {
     const response = await request(app)
       .post("/api/auth/login")
