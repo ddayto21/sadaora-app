@@ -1,18 +1,29 @@
-# Sadaora Starter App
+# 🔍 Recommendation Platform Overview
 
-This project is a lightweight `Member Profiles` + `Public Feed` application built for the Senior Full-Stack Engineer take-home assessment at `Sadaora`. It demonstrates core functionality including secure `user authentication`, `profile creation` and `management` (`CRUD`), and a `public feed` of `user profiles`. The goal is to highlight clean architecture, thoughtful API design, and a well-organized full-stack implementation.
+This starter app lays the groundwork for a personalized recommendation experience. While the current version focuses on user profiles, interests, and social connections, these features are more than just profile details—they’re structured data points that can be used to surface smarter, more relevant content over time.
+
+For example:
+
+- Interests (like “data science” or “entrepreneurship”) can be used to suggest relevant opportunities, people, or posts.
+
+- Following others creates connections that help prioritize content in a user’s feed and form the basis for a lightweight social graph.
+
+As the platform grows, these interactions can inform a recommendation engine—highlighting patterns, surfacing shared goals, and making the experience feel more personalized with every use. None of this is implemented yet, but the data model is designed with that future in mind. Think of it as planting seeds for intelligent discovery and user-driven insights later on.
 
 ---
 
 ## 🧠 Architectural Decisions
 
-The application is built with a clear separation between the `frontend` and `backend`. The `frontend` is developed using `React` with `Vite`, while the backend runs on `Node.js` with `Express`, connected to a `PostgreSQL` database through `Prisma`, a tool that simplifies database management and ensures consistency between data models and code.
+This application is built with a clean separation between the frontend and backend to ensure security, scalability, and maintainability.
 
-`Users` authenticate using a secure `email` and `password` flow. When users log in, the server generates a `JWT` (JSON Web Token), which is stored in an `HttpOnly` cookie—this keeps the session secure and reduces the risk of attacks. `Passwords` are safely hashed, and access to protected routes is restricted through `middleware` that checks for valid authentication.
+- The frontend is built using `React` and `Vite` for fast performance and a simple user experience.
+- The backend uses `Node.js`, `Express`, and `PostgreSQL`, with `Prisma` managing database structure and keeping data consistent with the code.
 
-The architecture separates `private login information` from `public-facing user data`. Each user has exactly one `profile`, and this connection is maintained through a `shared ID` between the two tables. This design keeps sensitive credentials secure and makes it easy to expand the system as new features are introduced.
+Users sign in with `email` and `password`. The system uses secure authentication methods like hashed passwords and `session tokens` (stored safely in HttpOnly cookies) to protect user data. Access to private routes is restricted to logged-in users only.
 
-On the backend, the code is organized into clear layers: `routes` handle incoming requests, `middleware` takes care of authentication and error handling, and `services` manage all communication with the database. The `frontend` connects to the `backend` through simple API calls, using `fetch` to send and receive data. The UI is intentionally minimal to keep the experience focused and easy to use.
+Each user has one profile, and sensitive login details are kept separate from public profile information. This approach keeps data secure while allowing flexibility as the platform grows.
+
+The backend is organized into clear layers—routes, middleware, and services—making the system easier to understand, test, and expand. The `frontend` communicates with the `backend` through `REST API calls`, and the interface remains intentionally minimal to keep the experience focused and user-friendly.
 
 ---
 
@@ -154,12 +165,12 @@ This gives the user full access to use the schema and its tables/sequences.
 
 We use `Prisma`, an Object-Relational Mapper (ORM) tool used to interact with our `PostgreSQL` database. It will act as a layer between the backend application and the database.
 
-#### 2.1 Initialize Prisma in the backend
+#### 2.1 Set up Prisma ORM
 
 Run this command from the `backend` directory:
 
 ```bash
-npx prisma init
+npm install prisma --save-dev
 ```
 
 This command will accomplish the following:
@@ -179,9 +190,6 @@ DATABASE_URL="postgresql://username:password@localhost:5432/sadaora"
 JWT_SECRET="your_jwt_secret"
 ```
 
-- **DATABASE_URL**: Connects `Prisma` to our local `PostgreSQL` database.
-- **JWT_SECRET**: Used by the backend to sign and verify `authentication tokens`.
-
 > This `.env` file will be automatically loaded when the server starts.
 
 ---
@@ -190,7 +198,7 @@ JWT_SECRET="your_jwt_secret"
 
 We define the shape of our database using Prisma `models`. These models represent the structure of the underlying `database tables` and how they relate to each other.
 
-Open the file located at `prisma/schema.prisma` and replace its contents with the following model definitions:
+Update the `prisma/schema.prisma` file to include a `User` and `Profile` model:
 
 ---
 
@@ -262,39 +270,37 @@ model Interest {
 
 ---
 
-#### 2.4 Create and apply database migration
+#### 2.4 Migrate the database schema.
 
-Once our models are defined, we run the following command to accomplish the following tasks:
-
-- Generate `SQL queries` based on the model definitions.
-- Apply those changes to the PostgreSQL database.
-- Generate a `Prisma client` designed to interact with the database.
+After adding the models, migrate your database using `Prisma Migrate`:
 
 ```bash
 npx prisma migrate dev --name init
 ```
 
-Install the Prisma CLI as the project:
-
-```bash
-npm install prisma --save-dev
-```
+- Generates `SQL queries` based on the model definitions.
+- Applies those changes to the PostgreSQL database.
+- Generates a `Prisma client` designed to interact with the database.
 
 We will be prompted to confirm database creation and Prisma will output SQL statements applied.
 
 ---
 
-#### 2.5 Generate prisma client
+#### 2.5 Setup Prisma Client
 
-Run `prisma generate` to create the prisma client based on the `prisma/schema.prisma` file.
+To get started with Prisma Client, first install the @prisma/client package:
+
+```bash
+npm install @prisma/client
+```
+
+Then, run `prisma generate`, which reads the prisma schema to generate a Prisma client
 
 ```bash
 npx prisma generate
 ```
 
-- Reads the `schema.prisma` file.
-- Generates the `Prisma Client` code inside `node_modules/@prisma/client`
-- Updates types and query methods based on our schema.
+Now, we can import the `PrismaClient` constructor from the `@prisma/client` package to create an instance of Prisma Client to send queries to our database.
 
 ---
 
