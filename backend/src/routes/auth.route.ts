@@ -2,11 +2,11 @@
 
 import { Router } from "express";
 import {
-  signup,
-  login,
+  signupUserHandler,
+  loginUserHandler,
   logoutHandler,
   checkAuthHandler,
-
+  deleterUserHandler,
 } from "../controllers/auth.controller";
 
 const router = Router();
@@ -25,7 +25,7 @@ const router = Router();
  * @access Public
  */
 
-router.post("/signup", signup);
+router.post("/signup", signupUserHandler);
 
 /**
  * @route POST /api/auth/login
@@ -41,7 +41,7 @@ router.post("/signup", signup);
  * @access Public
  */
 
-router.post("/login", login);
+router.post("/login", loginUserHandler);
 
 /**
  * @route GET /api/auth/me
@@ -66,4 +66,18 @@ router.get("/me", checkAuthHandler);
  */
 router.post("/logout", logoutHandler);
 
+/**
+ *
+ * @route POST /api/auth/delete
+ * @descr Deletes the current user
+ *
+ * - This route receives an HTTP POST request with `email` and `password` in the body.
+ * - It forwards the request to the `deleteUser` controller.
+ * - The controller handles input validation, and delegates user deletion to the `deleteUser` method from the `authServices`.
+ * * - The authService checks the database for the user with the provided email and password.
+ * - If the user is found, the controller responds with a `200 OK` status and a success message.
+ * * - If the user is not found, it responds with a `401 Unauthorized` status and an error message.
+ *
+ */
+router.post("/delete", deleterUserHandler);
 export default router;
