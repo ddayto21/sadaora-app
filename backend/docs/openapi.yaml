@@ -1,0 +1,273 @@
+openapi: 3.0.0
+info:
+  title: Profile API
+  version: 1.0.0
+  description: |
+    ## 📘 REST API for Authentication & Profile Management
+
+    This API provides secure endpoints for user signup, login, logout, and profile operations. Uses JWT (via cookies) for authentication.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: https://api.example.com
+    description: Production server that serves the API
+  - url: http://localhost:3001
+    description: Local development server that serves API
+
+tags:
+  - name: Authentication
+    description: Routes for user signup, login, logout, and session retrieval
+  - name: Profiles
+    description: Routes to view, create, update, and delete user profiles
+
+paths:
+  /auth/signup:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      description: |
+        Handles user registration.
+        - Accepts `email` and `password` in the request body.
+        - Hashes the `password` with `bcrypt` and stores in `PostgreSQL` database.
+        - Returns the created `user` object.
+      operationId: registerUser
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        "201":
+          description: User successfully created
+          content:
+            application/json:
+              example:
+                id: "uuid"
+                email: "user@example.com"
+                createdAt: "2025-04-24T12:00:00.000Z"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              example:
+                error: "Invalid email or password"
+        "401":
+          description: Unauthorized
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Log in existing user
+      description: |
+        Handles user login.
+        - Accepts `email` and `password` in the request body.
+        - Validates `credentials` and sets a `JWT` in an HTTP-only cookie.
+        - Returns the authenticated user object.
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: User successfully logged in - JWT stored in HTTP-only cookie.
+          content:
+            application/json:
+              example:
+                id: "uuid"
+                email: "user@example.com"
+                message: "Login successful"
+        "400":
+          description: Invalid credentials
+          content:
+            application/json:
+              example:
+                error: "Invalid email or password"
+        "401":
+          description: Unauthorized
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Log out user
+      operationId: logoutUser
+      responses:
+        "204":
+          description: Successfully logged out
+        "400":
+          description: Bad request
+  /auth/delete:
+    delete:
+      tags:
+        - Authentication
+      summary: Delete user account
+      description: |
+        Deletes the user account.
+        - Requires authentication via JWT.
+        - Returns a success message.
+      operationId: deleteUser
+      responses:
+        "204":
+          description: User account deleted
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+          
+
+  /auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current authenticated user
+      description: |
+        Reads the token from cookies and verifies it.
+        Returns the user if valid, otherwise returns 401.
+      operationId: getCurrentUser
+      responses:
+        "200":
+          description: Authenticated user data
+          content:
+            application/json:
+              example:
+                id: "uuid"
+                email: "user@example.com"
+                createdAt: "2025-04-24T12:00:00.000Z"
+        "401":
+          description: Unauthorized
+
+  /profiles:
+    get:
+      tags:
+        - Profiles
+      summary: Get all public profiles
+      operationId: getAllProfiles
+      responses:
+        "200":
+          description: List of profiles
+        "400":
+          description: Bad request
+
+    post:
+      tags:
+        - Profiles
+      summary: Create a new profile for authenticated user
+      operationId: createProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileInput"
+      responses:
+        "201":
+          description: Profile created
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+
+  /profiles/{id}:
+    get:
+      tags:
+        - Profiles
+      summary: Get a specific profile by ID
+      operationId: getProfileById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Profile details
+        "404":
+          description: Profile not found
+    put:
+      tags:
+        - Profiles
+      summary: Update a profile (owned by user)
+      operationId: updateProfile
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileInput"
+      responses:
+        "200":
+          description: Profile updated
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+    delete:
+      tags:
+        - Profiles
+      summary: Delete a profile (owned by user)
+      operationId: deleteProfile
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Profile deleted
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ProfileInput:
+      type: object
+      properties:
+        name:
+          type: string
+        bio:
+          type: string
+        avatarUrl:
+          type: string
+      required:
+        - name

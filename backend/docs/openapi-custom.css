@@ -1,0 +1,19 @@
+/* openapi-custom.css */
+body {
+    background: #f9fafb;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .swagger-ui .topbar {
+    background-color: #0f172a;
+    border-bottom: 2px solid #1e293b;
+  }
+  
+  .swagger-ui .topbar .topbar-wrapper .link span {
+    color: #f8fafc;
+    font-weight: bold;
+  }
+  
+  .swagger-ui .scheme-container {
+    background: #e2e8f0;
+  }

@@ -4,7 +4,7 @@ This starter app lays the groundwork for a personalized recommendation experienc
 
 For example:
 
-- Interests (like “data science” or “entrepreneurship”) can be used to suggest relevant opportunities, people, or posts.
+- `Interests` (like “data science” or “entrepreneurship”) can be used to suggest relevant opportunities, people, or posts.
 
 - Following others creates connections that help prioritize content in a user’s feed and form the basis for a lightweight social graph.
 
@@ -29,33 +29,98 @@ The backend is organized into clear layers—routes, middleware, and services—
 
 ## 📌 Assumptions Made
 
-• Each user has exactly one `profile`, and the profile can only be created or edited by the logged-in user.
+• Each user can create multiple `profiles`, and only the authenticated user can edit their own `profiles`.
 
-• `Profile pictures` are stored as `plain URLs`; image uploads (e.g. to S3) are excluded for scope but can be added easily using the existing schema.
+• The `public feed` displays other users’ `profiles` (not your own) and supports basic pagination.
 
-• The `public feed` shows other users’ profiles, not the currently logged-in user. It supports basic pagination.
+• User `interests` are stored as a simple list of text, but can be made more flexible if needed later.
 
-• The frontend design is minimal and focused on `functionality`, not visual polish.
-
-• API routes are open by default and are only protected when using `authentication middleware` that checks for a valid `session token`.
-
-• `Prisma` is used for schema definition, data querying, and automatic migration generation for a smoother developer experience.
-
-• UUIDs are used as unique identifiers to keep the system scalable and secure.
-
-• `User interests` are stored as a simple list of text, but can be made more flexible if needed later.
+• `Profile pictures` are stored as plain URLs. Image uploads (e.g., to S3) are out of scope for now but can be added easily with the current setup.
 
 ---
 
-## 📦 Database Schema Design
+## 📦 Database Schema
 
-This project uses `PostgreSQL` with `Prisma ORM` to define and manage the database structure. The schema is designed to separate `user authentication` data from user-facing `profile information`. This helps keep sensitive data secure and the database clean and easy to extend later.
+This project uses `PostgreSQL` with `Prisma ORM` to define and manage the database structure. The schema is designed to separate private `User` authentication data from public-facing `Profile` information.
 
-The `User` table stores essential login details like the user’s email, hashed password, and a unique id. This table is only responsible for authentication and user identity—it doesn’t store public-facing data like a bio or profile picture. Each user can optionally have one profile, which is represented as a one-to-one relationship with the Profile table.
+### User Table
 
-The `Profile` table stores all public information about a user, such as their name, bio, headline, photoUrl, and list of interests. It has a userId field, which acts as a foreign key—this means it links back to a specific id in the User table. This creates a one-to-one relationship, where each profile is connected to exactly one user, and each user can have at most one profile.
+Stores authentication credentials and core user metadata, including the list of profiles created by that user.
 
-This structure follows best practices for relational databases: it keeps sensitive data (like passwords) isolated, makes relationships between users and their profiles clear, and supports future features like likes, follows, or tags without major changes to the core schema.
+```prisma
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // hashed
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  profiles  Profile[]
+}
+```
+
+### Profile Table
+
+Represents individual profiles tied to a user. Each user may own multiple profiles.
+
+```prisma
+model Profile {
+  id        String   @id @default(uuid())
+  name      String
+  bio       String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId String
+  user   User @relation(fields: [userId], references: [id])
+}
+```
+
+---
+
+## Authentication Workflow
+
+### Signup Flow
+
+- Validate email/password input.
+- Hash the password using `bcrypt`.
+- Insert user into the `User` table.
+- Set a `JWT token` (signed with a secure server `secret`) in an `HTTP-only` cookie.
+
+### Login Flow
+
+- Validate user credentials (email / password).
+- Compare password with stored hasth.
+- On success, issue JWT token in HTTP-only cooke.
+
+### JWT Validation Middleware
+
+- Extract and verify JWT from cookie.
+- Populate request context with authenticated user info for downstream routes.
+
+---
+
+## REST API Endpoints
+
+This REST API supports user authentication and profile management using Node.js, Express, Prisma ORM, and PostgreSQL.
+
+### Authentication Routes
+
+```bash
+| Method   | Endpoint    | Description          |
+|----------|-------------|----------------------|
+| POST     | auth/signup | Register new user    |
+| POST     | auth/login  | Login existing user  |
+| POST     | auth/logout | Remove cookies       |
+
+```
+
+### Profile Routes
+
+Authenticated routes protected via middleware.
+
+```typescript
+GET / profiles;
+```
 
 ---
 
