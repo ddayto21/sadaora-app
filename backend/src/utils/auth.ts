@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import validator from "validator";
 import type { AuthTokenPayload } from "../interfaces/auth";
 
 const JWT_SECRET = process.env.JWT_SECRET || "default-secret-key";
@@ -30,17 +31,76 @@ export function decodeToken(token: string): any {
 }
 
 /**
- * Validates email format using regex.
- * Prevents invalid structures like:
- * - Consecutive dots
- * - Leading/trailing dots in domain
- * - Incomplete or malformed addresses
+ * Validates whether a string is a well-formed email.
+ * @param email - The email string to validate
+ * @returns True if valid, false otherwise
  */
-export const isValidEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
+export function isValidEmail(email: string): boolean {
+  return validator.isEmail(email);
+}
 
-  // Disallow consecutive dots
-  if (email.includes("..")) return false;
+/**
+ * Validates a password for basic security standards:
+ * - Minimum 8 characters
+ * - At least one lowercase letter
+ * - At least one uppercase letter
+ * - At least one digit
+ * - At least one special character (!@#$%^&* etc.)
+ * - No spaces allowed
+ *
+ * @param password - The password string to validate
+ * @returns True if the password is valid, false otherwise
+ */
+export function validatePassword(password: string): boolean {
+  const minLength = 8;
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasLowerCase = /[a-z]/.test(password);
+  const hasNumber = /\d/.test(password);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  const hasNoSpaces = !/\s/.test(password);
 
-  return emailRegex.test(email);
-};
+  return (
+    password.length >= minLength &&
+    hasUpperCase &&
+    hasLowerCase &&
+    hasNumber &&
+    hasSpecialChar &&
+    hasNoSpaces
+  );
+}
+
+/**
+ * Sanitizes and normalizes an email string.
+ * @param email - The raw email input
+ * @returns A normalized and trimmed email, or null if invalid
+ */
+export function sanitizeEmail(email: string): string | null {
+  const normalized = validator.normalizeEmail(email.trim());
+  return normalized || null;
+}
+
+/**
+ * Sanitizes a password input by trimming and escaping special characters.
+ * @param password - The raw password input
+ * @returns A sanitized password string
+ */
+export function sanitizePassword(password: string): string {
+  return validator.escape(password.trim());
+}
+
+/**
+ * Validates password strength using basic security rules:
+ * - Minimum 8 characters
+ * - At least 1 lowercase, 1 uppercase, 1 number, and 1 symbol
+ * @param password - The password string to check
+ * @returns True if password meets strength requirements
+ */
+export function isStrongPassword(password: string): boolean {
+  return validator.isStrongPassword(password, {
+    minLength: 8,
+    minLowercase: 1,
+    minUppercase: 1,
+    minNumbers: 1,
+    minSymbols: 1,
+  });
+}
