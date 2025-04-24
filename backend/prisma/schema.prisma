@@ -14,26 +14,31 @@ datasource db {
 }
 
 model User {
-  id       String   @id @default(uuid())
-  email    String   @unique
-  password String
-  profile  Profile?
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt  @default(now())
+  profiles  Profile[]
 }
 
 model Profile {
   id        String     @id @default(uuid())
-  userId    String     @unique
   name      String
-  bio       String
-  headline  String
-  photoUrl  String?
-  interests Interest[]
+  username  String  @unique
+  bio       String?
+  headline  String?
+  photoUrl String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt @default(now()) 
+  userId    String
   user      User       @relation(fields: [userId], references: [id])
+  interests  Interest[]
 }
 
 model Interest {
-  id        String   @id @default(uuid())
+  id        String  @id @default(uuid())
   label     String
-  profile   Profile  @relation(fields: [profileId], references: [id])
   profileId String
+  profile   Profile @relation(fields: [profileId], references: [id])
 }
