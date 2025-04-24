@@ -1,0 +1,6 @@
+{
+    "watch": ["src", "docs/openapi.yaml"],
+    "ext": "ts,yaml",
+    "ignore": ["**/*.test.ts"],
+    "exec": "ts-node src/index.ts"
+  }

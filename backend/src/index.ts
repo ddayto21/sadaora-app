@@ -12,9 +12,9 @@
  */
 
 import authRoutes from "./routes/auth.route";
-import profileRoutes from "./routes/profile";
-import feedRoutes from "./routes/feed";
-import docRoutes from "./routes/docs";
+import profileRoutes from "./routes/profile.route";
+import feedRoutes from "./routes/feed.route";
+import docRoutes from "./routes/docs.route";
 
 import express, { Request, Response } from "express";
 import bcrypt from "bcrypt";

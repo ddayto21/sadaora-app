@@ -12,6 +12,7 @@ node_modules/
 prisma/dev.db
 prisma/dev.db-journal
 prisma/migrations/
+prisma/generated/
 .prisma/
 
 # Build output
