@@ -50,7 +50,7 @@ export const getProfile = async (
   console.log(`[*] Retrieving profile for user ID: ${userId}`);
   
   return databaseClient.profile.findUnique({
-    where: { userId },
+    where: { id: userId },
     include: {
       interests: true,
       ...(options?.includeUser ? { user: true } : {}),
@@ -79,7 +79,7 @@ export const updateProfile = async (
   await databaseClient.interest.deleteMany({ where: { profile: { userId } } });
 
   return databaseClient.profile.update({
-    where: { userId },
+    where: { id: userId },
     data: {
       ...profileData,
       interests: {
@@ -103,6 +103,6 @@ export const deleteProfile = async (userId: string) => {
   });
 
   return databaseClient.profile.delete({
-    where: { userId },
+    where: { id: userId },
   });
 };

@@ -2,90 +2,89 @@
 
 import bcrypt from "bcrypt";
 import databaseClient from "../db-client";
-import { decodeToken } from "../utils/jwt";
+import { decodeToken } from "../utils/auth";
+import type { User } from "@prisma/client";
 
 /**
- * Designed to create a user profile in the postgresql database
- *
- * This services takes an email and raw password, hashes the password using bcrypt for security, and creates a new user record with prisma database client
- *
- * Called by the `signup` controller in `auth.controller.ts`.
- *
- * @param email - The user's email address
- * @param password - The user's raw (unhashed) password.
- * @returns A promise resolving to the newlyh created user object.
+ * Creates a new user with a securely hashed password.
+ * @param email - The user's email address.
+ * @param password - The raw password (to be hashed).
+ * @returns The created user object.
  */
-export async function createUser(email: string, password: string) {
-  const hashed = await bcrypt.hash(password, 10);
-  return databaseClient.user.create({ data: { email, password: hashed } });
-}
-
-/**
- * Handles user login and password verification flow.
- *
- * Looks up the user by email, and compares the provided password
- * with the hashed password stored in the database.
- *
- * Called by the `login` controller in `auth.controller.ts`
- *
- * @param email - The user's email address
- * @param password - The raw password submit by the user.
- * @returns The user object if credentials are valid, otherwise null
- */
-
-export async function loginUser(email: string, password: string) {
-  const user = await databaseClient.user.findUnique({
-    where: { email },
+export async function createUser(
+  email: string,
+  password: string
+): Promise<User> {
+  const hashedPassword = await bcrypt.hash(password, 10);
+  return databaseClient.user.create({
+    data: { email, password: hashedPassword },
   });
-  if (!user) return null;
-
-  const isValid = await bcrypt.compare(password, user.password);
-  if (!isValid) return null;
-
-  return user;
-}
-
-/** Prevents duplicate users by checking if emamil already registered */
-export async function findUserByEmail(email: string) {
-  const user = await databaseClient.user.findUnique({
-    where: { email },
-  });
-  return user;
 }
 
 /**
- * Verifies if a user is authenticated by validating the JWT token.
- *
- * Reads the JWT token from the provided cookie string, verifies its signature,
- * and uses the decoded payload to look up the user in the database.
- *
- * Called by the `verify` controller (e.g. in `/api/auth/me`) to check
- * if the request is coming from a valid, logged-in user.
- *
- * @param token - The JWT string (typically extracted from req.cookies.token)
- * @returns The user object if the token is valid, otherwise null
+ * Deletes a user by email.
+ * @param email - The email of the user to delete.
+ * @returns The deleted user object.
  */
-
-export async function getUser(token: string) {
+export async function deleteUser(email: string): Promise<User | null> {
   try {
-    const decoded = decodeToken(token);
-    const user = await databaseClient.user.findUnique({
-      where: { id: decoded.userId },
+    return await databaseClient.user.delete({
+      where: { email },
     });
-    return user || null;
   } catch (error) {
+    console.error(`Error deleting user with email ${email}:`, error);
     return null;
   }
 }
 
-// TODO: Add service to handle user logout
+/**
+ * Finds a user by email.
+ * @param email - The email to search for.
+ * @returns The found user object, or null if not found.
+ */
+export async function findUserByEmail(email: string): Promise<User | null> {
+  return databaseClient.user.findUnique({ where: { email } });
+}
 
 /**
- * Handles user logout by clearing the JWT token cookie.
- *
- * This is typically called when the user clicks "Logout" in the UI,
- * and it removes the token from the client's cookies, effectively
- * logging them out.
- *
- * @param response - The Express response object to set the cookie
+ * Authenticates a user by verifying their email and password.
+ * @param email - The user's email.
+ * @param password - The raw password to validate.
+ * @returns The user object if valid, otherwise null.
  */
+
+export async function loginUser(
+  email: string,
+  password: string
+): Promise<User | null> {
+  const user = await findUserByEmail(email);
+  if (!user) return null;
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  return isMatch ? user : null;
+}
+
+/**
+ * Verifies a user's identity based on their JWT token.
+ * @param token - The JWT string from the client.
+ * @returns The authenticated user object, or null if invalid.
+ */
+
+export async function verifyAuthToken(token: string): Promise<User | null> {
+  try {
+    const decoded = decodeToken(token);
+    return await databaseClient.user.findUnique({
+      where: { id: decoded.userId },
+    });
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Retrieves all users.
+ * @returns An array of all user records.
+ */
+export async function getAllUsers(): Promise<User[]> {
+  return databaseClient.user.findMany();
+}

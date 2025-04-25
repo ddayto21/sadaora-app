@@ -12,7 +12,7 @@
 
 // src/middleware/auth.middleware.ts
 import { Request, Response, NextFunction } from "express";
-import { decodeToken } from "../utils/jwt";
+import { decodeToken } from "../utils/auth";
 
 export const authMiddleware = (
   req: Request,
